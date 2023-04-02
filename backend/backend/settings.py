@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'base',
     'doctors',
+    'accounts',
     'rest_framework',
     'drf_spectacular',
 ]
@@ -137,3 +140,12 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+# Celery
+
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
+REGISTRATION_CONFIRM = 60 * 60 * 24
+
+FRONTEND_HOST = 'http://127.0.0.1:8000'
+FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
+FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'

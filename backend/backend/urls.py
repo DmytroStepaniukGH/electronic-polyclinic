@@ -5,6 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 
 api = [
     path('', include('doctors.urls')),
+    path('', include('accounts.urls')),
 ]
 
 urlpatterns = [
