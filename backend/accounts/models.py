@@ -26,6 +26,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     address_house = models.CharField(verbose_name='Будинок', max_length=10, blank=True)
     address_appartment = models.CharField(verbose_name='Квартира', max_length=10, blank=True)
     is_confirmed = models.BooleanField(verbose_name='Верифікований', default=0, blank=True)
+<<<<<<< HEAD
+    is_doctor = models.BooleanField(verbose_name='Чи є лікарем', default=0, blank=True)
+=======
+>>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
 
     is_staff = models.BooleanField(
         _("staff status"),

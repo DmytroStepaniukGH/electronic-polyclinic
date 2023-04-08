@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'base',
+<<<<<<< HEAD
+    'users',
+=======
     'doctors',
+>>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
     'accounts',
     'rest_framework',
     'drf_spectacular',
@@ -131,6 +135,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -159,6 +164,11 @@ FRONTEND_HOST = 'http://127.0.0.1:8000'
 FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
 FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'
 
+<<<<<<< HEAD
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+=======
 #Email sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -167,3 +177,4 @@ EMAIL_HOST_USER = 'millarissa.valdes@gmail.com'
 EMAIL_HOST_PASSWORD = 'hnhvsdyahetuwbdw'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+>>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
