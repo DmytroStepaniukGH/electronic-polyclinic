@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'doctors',
+    'base',
+    'users',
+    'accounts',
     'rest_framework',
     'drf_spectacular',
 ]
@@ -119,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -137,3 +141,16 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+# Celery
+
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
+REGISTRATION_CONFIRM = 60 * 60 * 24
+
+FRONTEND_HOST = 'http://127.0.0.1:8000'
+FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
+FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
