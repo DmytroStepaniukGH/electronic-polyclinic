@@ -39,11 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'base',
-<<<<<<< HEAD
     'users',
-=======
-    'doctors',
->>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
     'accounts',
     'rest_framework',
     'drf_spectacular',
@@ -164,11 +160,9 @@ FRONTEND_HOST = 'http://127.0.0.1:8000'
 FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
 FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'
 
-<<<<<<< HEAD
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-=======
+
 #Email sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -177,4 +171,3 @@ EMAIL_HOST_USER = 'millarissa.valdes@gmail.com'
 EMAIL_HOST_PASSWORD = 'hnhvsdyahetuwbdw'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
->>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
