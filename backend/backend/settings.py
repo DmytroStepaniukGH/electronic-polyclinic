@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'base',
     'users',
-    'doctors',
     'accounts',
     'rest_framework',
     'drf_spectacular',
