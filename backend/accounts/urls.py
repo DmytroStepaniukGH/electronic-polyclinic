@@ -5,6 +5,7 @@ from .views.password_reset import PasswordResetConfirmView
 from .views.registration import RegistrationView
 from .views.registration import ConfirmRegistrationView
 from .views.login import LoginView
+from .views.logout import LogoutView
 
 app_name = 'accounts'
 
@@ -14,4 +15,5 @@ urlpatterns = [
     path('register-user/', RegistrationView.as_view(), name='register-user'),
     path('register-user-confirm/', ConfirmRegistrationView.as_view(), name='register-user-confirm'),
     path('login-user/', LoginView.as_view(), name='login-user'),
+    path('logout-user/', LogoutView.as_view(), name='logout-user'),
 ]

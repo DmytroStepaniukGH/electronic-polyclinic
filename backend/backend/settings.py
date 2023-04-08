@@ -95,7 +95,16 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'backend.password_validation.PasswordLengthValidation',
+    },
+    {
+        'NAME': 'backend.password_validation.PasswordUppercaseValidation',
+    },
+    {
+        'NAME': 'backend.password_validation.PasswordLowercaseValidation',
+    },
+    {
+        'NAME': 'backend.password_validation.PasswordDigitValidation',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -149,3 +158,12 @@ REGISTRATION_CONFIRM = 60 * 60 * 24
 FRONTEND_HOST = 'http://127.0.0.1:8000'
 FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
 FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'
+
+#Email sending
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'millarissa.valdes@gmail.com'
+EMAIL_HOST_PASSWORD = 'hnhvsdyahetuwbdw'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
