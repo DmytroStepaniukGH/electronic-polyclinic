@@ -39,6 +39,17 @@ class Patient(models.Model):
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name} {self.user.patronim_name}'
 
+    def cancel_appointment(self, date, time):
+
+        appointment = self.appointments.filter(day=date).filter(time=time)
+        if appointment:
+            appointment.status = 'Скасовано'
+            print('Status', appointment.status)
+            appointment.save(update_fields=['status'])
+            print(appointment.status)
+
+        else:
+            return Exception('Не знайдено записів з такими датою і часом')
 
 
 class Doctor(models.Model):
@@ -62,6 +73,12 @@ class Doctor(models.Model):
                 slots[1][appointment.time] = False
 
         return slots
+
+    def set_unavailable_time(self, date, time):
+        technical_user = Patient.objects.get(id=3)
+        print(self.user.id)
+        unavailable_time = Appointment(doctor=self, patient=technical_user, day=date, time=time)
+        unavailable_time.save()
 
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name}' \

@@ -3,9 +3,21 @@ from .models import Appointment, Doctor
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    #patient_last_name = serializers.CharField(source='patient.user.last_name')
+
     class Meta:
         model = Appointment
-        fields = '__all__'
+        fields = (
+            'id',
+            'day',
+            'time',
+            'patient',
+            'doctor',
+            'status',
+        )
+
+    # def create(self, validated_data):
+    #     return Appointment.objects.create(**validated_data)
 
 
 class DoctorListSerializer(serializers.ModelSerializer):

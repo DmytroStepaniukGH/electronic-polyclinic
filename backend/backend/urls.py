@@ -8,14 +8,8 @@ from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 api = [
-<<<<<<< HEAD
     path('', include('users.urls')),
     path('accounts/', include('accounts.urls')),
-
-=======
-    path('', include('doctors.urls')),
-    path('', include('accounts.urls')),
->>>>>>> 2a67131b69271284b976cb5304854fdb0c03f3d6
 ]
 
 urlpatterns = [
