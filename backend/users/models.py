@@ -41,19 +41,25 @@ class Patient(models.Model):
 
     def create_appointment(self, doctor_id, date, time):
         check_another_appointment = Appointment.objects.filter(patient=self, day=date, time=time)
-        doctor = Doctor.objects.get(id=doctor_id)
 
-        unavailable_times = doctor.unavailable_time.filter(date=date).values_list('time', flat=True)
+        if check_date_time(date, time):
 
-        if not check_another_appointment:
-            if time not in unavailable_times:
-                appointment = Appointment(patient=self, doctor=doctor, day=date, time=time)
-                appointment.save()
-                return f'Appointment at {date} {time} has been created successfully'
+            doctor = Doctor.objects.get(id=doctor_id)
+
+            unavailable_times = doctor.unavailable_time.filter(date=date).values_list('time', flat=True)
+
+            if not check_another_appointment:
+                if time not in unavailable_times:
+                    appointment = Appointment(patient=self, doctor=doctor, day=date, time=time)
+                    appointment.save()
+                    return f'Appointment at {date} {time} has been created successfully'
+                else:
+                    return f'Error: time {time} on {date} has been marked by doctor as unavailable'
             else:
-                return f'Error: time {time} on {date} has been marked by doctor as unavailable'
+                return f'Error: you already have another appointment at {time} on {date}'
+
         else:
-            return f'Error: you already have another appointment at {time} on {date}'
+            return 'Date/time not valid'
 
     def cancel_appointment(self, date, time):
 
@@ -127,3 +133,23 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f'{self.patient} запис до {self.doctor} {self.day} о {self.time}'
+
+
+def check_date_time(date, time):
+    today = datetime.today().strftime('%Y-%m-%d')
+    time_now = datetime.now().strftime('%H:%M')
+
+    if date > today:
+        if time in (time, time) in TIME_CHOICES:
+            return True
+        else:
+            return False
+
+    elif date == today:
+        if time >= time_now and (time, time) in TIME_CHOICES:
+            return True
+        else:
+            return False
+
+    else:
+        return False
