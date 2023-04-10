@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status, viewsets, filters
-from rest_framework.generics import GenericAPIView, ListAPIView
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Appointment, Doctor, Patient
-from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SearchSerializer
+from .serializers import AppointmentSerializer, DoctorListSerializer
 
 
 @extend_schema(
@@ -21,17 +21,8 @@ class CreateAppointmentView(APIView):
         doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
 
         patient = Patient.objects.get(user=self.request.user)
-        doctor = Doctor.objects.get(id=doctor_id)
 
-        check_another_appointment = Appointment.objects.filter(patient=patient, day=date, time=time)
-
-        if not check_another_appointment:
-            appointment = Appointment(patient=patient, doctor=doctor, day=date, time=time)
-            appointment.save()
-            return Response(f'Appointment at {date} {time} has been created successfully',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response(f'Error. Exist another appointment at {date} {time}', status=status.HTTP_400_BAD_REQUEST)
+        return Response(patient.create_appointment(doctor_id=doctor_id, date=date, time=time))
 
 
 @extend_schema(

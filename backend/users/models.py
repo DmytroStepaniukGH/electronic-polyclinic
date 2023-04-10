@@ -39,6 +39,22 @@ class Patient(models.Model):
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name} {self.user.patronim_name}'
 
+    def create_appointment(self, doctor_id, date, time):
+        check_another_appointment = Appointment.objects.filter(patient=self, day=date, time=time)
+        doctor = Doctor.objects.get(id=doctor_id)
+
+        unavailable_times = doctor.unavailable_time.filter(date=date).values_list('time', flat=True)
+
+        if not check_another_appointment:
+            if time not in unavailable_times:
+                appointment = Appointment(patient=self, doctor=doctor, day=date, time=time)
+                appointment.save()
+                return f'Appointment at {date} {time} has been created successfully'
+            else:
+                return f'Error: time {time} on {date} has been marked by doctor as unavailable'
+        else:
+            return f'Error: you already have another appointment at {time} on {date}'
+
     def cancel_appointment(self, date, time):
 
         appointment = self.appointments.filter(day=date).filter(time=time)
@@ -67,23 +83,36 @@ class Doctor(models.Model):
         for t in TIME_CHOICES:
             slots[1][t[0]] = True
         print(datetime.today().strftime('%Y-%m-%d %H:%M'))
+
         all_appointments = self.appointments.filter(day=date)
+        unavailable_times = self.unavailable_time.filter(date=date).values_list('time', flat=True)
+
+        print(unavailable_times)
+
         for appointment in all_appointments:
             if appointment.time in slots[1].keys():
                 slots[1][appointment.time] = False
 
+        for time in slots[1].keys():
+            if time in unavailable_times:
+                slots[1][time] = False
+
         return slots
 
     def set_unavailable_time(self, date, time):
-        technical_user = Patient.objects.get(id=3)
-        print(self.user.id)
-        unavailable_time = Appointment(doctor=self, patient=technical_user, day=date, time=time)
+        unavailable_time = DoctorUnavailableTime(doctor=self, date=date, time=time)
         unavailable_time.save()
 
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name}' \
                f' {self.user.patronim_name}. Email: {self.user.email}. ' \
                f'Спеціалізація: {self.specialization}'
+
+
+class DoctorUnavailableTime(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='unavailable_time')
+    date = models.DateField(default=datetime.now)
+    time = models.CharField(max_length=10, choices=TIME_CHOICES, default="09:00")
 
 
 class Appointment(models.Model):
