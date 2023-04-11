@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 from django.db import models
 from django.utils import timezone
 
-from accounts.models import User
+from accounts.models import User # noqa
 
 TIME_CHOICES = (
     ("09:00", "09:00"),
@@ -38,7 +38,6 @@ class Patient(models.Model):
 
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name} {self.user.patronim_name}'
-
 
 
 class Doctor(models.Model):

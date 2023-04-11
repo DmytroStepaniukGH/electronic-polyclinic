@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
 
 from drf_spectacular.utils import extend_schema
+
+from django.db.models import Avg, Count, Sum, Value
 from rest_framework import generics, status, viewsets, filters
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Appointment, Doctor
+from reviews.models import Review # noqa
 from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SearchSerializer
 
 
@@ -88,6 +91,22 @@ class DoctorsListViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Doctor.objects.all()
 
         return queryset
+
+
+@extend_schema(
+    tags=['Doctors'],
+    description="Return information about doctor"
+)
+class DoctorView(APIView):
+    serializer_class = DoctorListSerializer
+
+    def get(self, *args, **kwargs):
+        doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
+
+        doctor_info = Doctor.objects.get(id=doctor_id)
+        doctor_serializer = DoctorListSerializer(doctor_info)
+
+        return Response(doctor_serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
