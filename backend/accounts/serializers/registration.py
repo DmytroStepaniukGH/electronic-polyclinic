@@ -11,11 +11,9 @@ UserModel = get_user_model()
 
 class RegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
     first_name = serializers.CharField(write_only=True)
     last_name = serializers.CharField(write_only=True)
     phone_num = serializers.CharField(write_only=True)
-
     password = serializers.CharField(write_only=True, validators=[validate_password])
 
     def create(self, validated_data):
@@ -31,7 +29,6 @@ class RegistrationSerializer(serializers.Serializer):
     class Meta:
         model = UserModel
         fields = ("id", "email", "password", 'first_name', 'last_name', 'phone_num')
-
 
 
 class ConfirmRegistrationSerializer(serializers.Serializer):
@@ -66,4 +63,3 @@ class ConfirmRegistrationSerializer(serializers.Serializer):
         user.is_confirmed = 1
         user.save(update_fields=('is_confirmed',))
         return user
-

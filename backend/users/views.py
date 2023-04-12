@@ -193,6 +193,22 @@ class DoctorsListViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema(
     tags=['Doctors'],
+    description="Return information about doctor"
+)
+class DoctorView(APIView):
+    serializer_class = DoctorListSerializer
+
+    def get(self, *args, **kwargs):
+        doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
+
+        doctor_info = Doctor.objects.get(id=doctor_id)
+        doctor_serializer = DoctorListSerializer(doctor_info)
+
+        return Response(doctor_serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    tags=['Doctors'],
     description="Return list of all doctors if parameter 'specialization' not provided."
                 "Else return list of doctors filtered by specialization"
 
