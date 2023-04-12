@@ -1,11 +1,11 @@
 from django.urls import path
 
-from .views.password_reset import PasswordResetRequestView
-from .views.password_reset import PasswordResetConfirmView
-from .views.registration import RegistrationView
-from .views.registration import ConfirmRegistrationView
-from .views.login import LoginView
-from .views.logout import LogoutView
+from accounts.views.password_reset import PasswordResetRequestView, PasswordResetConfirmView # noqa
+from accounts.views.registration import RegistrationView, ConfirmRegistrationView # noqa
+from accounts.views.login import LoginView # noqa
+from accounts.views.logout import LogoutView # noqa
+from accounts.views.account_info import AccountView # noqa
+from accounts.views.account_edit import AccountEditView # noqa
 
 app_name = 'accounts'
 
@@ -16,4 +16,6 @@ urlpatterns = [
     path('register-user-confirm/', ConfirmRegistrationView.as_view(), name='register-user-confirm'),
     path('login-user/', LoginView.as_view(), name='login-user'),
     path('logout-user/', LogoutView.as_view(), name='logout-user'),
+    path('user-<user_id>/my-account/', AccountView.as_view(), name='my-account'),
+    path('user/my-account/edit/', AccountEditView.as_view(), name='my-account-edit')
 ]
