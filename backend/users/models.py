@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta, time
-
+from datetime import datetime
 from django.db import models
-from django.utils import timezone
 
-from accounts.models import User # noqa
+from accounts.models import User
+
 
 TIME_CHOICES = (
     ("09:00", "09:00"),
@@ -27,9 +26,8 @@ TIME_CHOICES = (
 )
 
 STATUS_CHOICES = (
-    ("Активний", "Активний"),
-    ("Завершений", "Завершений"),
-    ("Скасований", "Скасований"),
+    ("Active", "Active"),
+    ("Closed", "Closed"),
 )
 
 
@@ -39,10 +37,49 @@ class Patient(models.Model):
     def __str__(self):
         return f'{self.user.last_name} {self.user.first_name} {self.user.patronim_name}'
 
+    def create_appointment(self, doctor_id, date, time):
+        check_another_appointment = Appointment.objects.filter(patient=self, date=date, time=time)
+
+        if check_date_time(date, time):
+
+            doctor = Doctor.objects.get(id=doctor_id)
+
+            unavailable_times = doctor.unavailable_time.filter(date=date).values_list('time', flat=True)
+
+            if not check_another_appointment:
+                if time not in unavailable_times:
+                    appointment = Appointment(patient=self, doctor=doctor, day=date, time=time)
+                    appointment.save()
+                    return f'Appointment at {date} {time} has been created successfully'
+                else:
+                    return f'Error: time {time} on {date} has been marked by doctor as unavailable'
+            else:
+                return f'Error: you already have another appointment at {time} on {date}'
+
+        else:
+            return 'Date/time not valid'
+
+    '''
+    def cancel_appointment(self, date, time):
+
+        appointment = self.appointments.filter(day=date).filter(time=time)
+        if appointment:
+            appointment.status = 'Скасовано'
+            print('Status', appointment.status)
+            appointment.save(update_fields=['status'])
+            print(appointment.status)
+
+        else:
+            return Exception('Не знайдено записів з такими датою і часом')
+    '''
+
 
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_image = models.ImageField(upload_to='doctors_profile_images', default="default_image.png", blank=True)
+    profile_image = models.ImageField(verbose_name='Фото профіля',
+                                      upload_to='doctors_profile_photo',
+                                      default="default_image.png",
+                                      blank=True)
     specialization = models.CharField(verbose_name='Спеціалізація', max_length=150)
     price = models.IntegerField(verbose_name='Вартість прийому')
     experience = models.CharField(verbose_name='Стаж', max_length=20)
@@ -55,28 +92,95 @@ class Doctor(models.Model):
         for t in TIME_CHOICES:
             slots[1][t[0]] = True
         print(datetime.today().strftime('%Y-%m-%d %H:%M'))
-        all_appointments = self.appointments.filter(day=date)
+
+        all_appointments = self.appointments.filter(date=date)
+        unavailable_times = self.unavailable_time.filter(date=date).values_list('time', flat=True)
+
+        print(unavailable_times)
+
         for appointment in all_appointments:
             if appointment.time in slots[1].keys():
                 slots[1][appointment.time] = False
 
+        for time in slots[1].keys():
+            if time in unavailable_times:
+                slots[1][time] = False
+
         return slots
 
+    def set_unavailable_time(self, date, time):
+        unavailable_time = DoctorUnavailableTime(doctor=self, date=date, time=time)
+        unavailable_time.save()
+
+    def close_appointment(self, date, time, medical_history, objective_status,
+                          diagnosis, examination, recommendations):
+        appointment = Appointment.objects.get(doctor=self, day=date, time=time)
+
+        if appointment:
+            appointment.medical_history = medical_history
+            appointment.objective_status = objective_status
+            appointment.diagnosis = diagnosis
+            appointment.examination = examination
+            appointment.recommendations = recommendations
+
+            appointment.status = 'Closed'
+            appointment.save()
+
+            return True
+        else:
+            return False
+
     def __str__(self):
-        return f'{self.user.last_name} {self.user.first_name}' \
-               f' {self.user.patronim_name}. Email: {self.user.email}. ' \
-               f'Спеціалізація: {self.specialization}'
+        return f'{self.specialization} - {self.user.last_name} {self.user.first_name}' \
+               f' {self.user.patronim_name}. Email: {self.user.email}. '
+
+
+class DoctorUnavailableTime(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='unavailable_time')
+    date = models.DateField(default=datetime.now)
+    time = models.CharField(max_length=10, choices=TIME_CHOICES, default="09:00")
 
 
 class Appointment(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='appointments')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    day = models.DateField(default=datetime.now)
+    date = models.DateField(default=datetime.now)
     time = models.CharField(max_length=10, choices=TIME_CHOICES, default="09:00")
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="Активний")
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="Active")
+
+    medical_history = models.CharField(verbose_name='Анамнез захворювання',
+                                       default='', blank=True, max_length=1000)
+    objective_status = models.CharField(verbose_name="Об'єктивний статус",
+                                        default='', blank=True, max_length=1000)
+    diagnosis = models.CharField(verbose_name='Діагноз',
+                                        default='', blank=True, max_length=500)
+    examination = models.CharField(verbose_name='Обстеження',
+                                        default='', blank=True, max_length=1000)
+    recommendations = models.CharField(verbose_name='Рекомендації',
+                                        default='', blank=True, max_length=1000)
 
     class Meta:
-        unique_together = ('doctor', 'day', 'time')
+        unique_together = ('doctor', 'date', 'time')
 
     def __str__(self):
-        return f'{self.patient} запис до {self.doctor} {self.day} о {self.time}'
+        return f'{self.patient} запис до {self.doctor} {self.date} о {self.time}'
+
+
+def check_date_time(date, time):
+    today = datetime.today().strftime('%Y-%m-%d')
+    time_now = datetime.now().strftime('%H:%M')
+
+    if date > today:
+        if time in (time, time) in TIME_CHOICES:
+            return True
+        else:
+            return False
+
+    elif date == today:
+        if time >= time_now and (time, time) in TIME_CHOICES:
+            return True
+        else:
+            return False
+
+    else:
+        return False

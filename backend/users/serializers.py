@@ -1,12 +1,30 @@
 from rest_framework import serializers
-from .models import Appointment, Doctor
+from .models import Appointment, Doctor, DoctorUnavailableTime
 from reviews.models import Review # noqa
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    #patient_last_name = serializers.CharField(source='patient.user.last_name')
+    #date = serializers.DateField()
+
     class Meta:
         model = Appointment
-        fields = '__all__'
+        fields = (
+            'id',
+            'date',
+            'time',
+            'patient',
+            'doctor',
+            'status',
+            'medical_history',
+            'objective_status',
+            'diagnosis',
+            'examination',
+            'recommendations'
+        )
+
+    # def create(self, validated_data):
+    #     return Appointment.objects.create(**validated_data)
 
 
 class DoctorListSerializer(serializers.ModelSerializer):
@@ -15,6 +33,7 @@ class DoctorListSerializer(serializers.ModelSerializer):
     patronim_name = serializers.CharField(source='user.patronim_name')
     email = serializers.CharField(source='user.email')
     rating = serializers.SerializerMethodField('get_average_rating')
+
 
     def get_average_rating(self, obj):
         reviews_rating = Review.objects.filter(doctor_id=obj.id).values_list('review_rating', flat=True)
@@ -37,7 +56,7 @@ class DoctorListSerializer(serializers.ModelSerializer):
             'category',
             'experience',
             'info',
-            'rating'
+            'rating',
         )
 
 
@@ -56,4 +75,15 @@ class SearchSerializer(serializers.ModelSerializer):
             'id',
             'last_name',
             'specialization'
+        )
+
+
+class SetUnavailableTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorUnavailableTime
+        fields = (
+            'id',
+            'doctor',
+            'date',
+            'time',
         )

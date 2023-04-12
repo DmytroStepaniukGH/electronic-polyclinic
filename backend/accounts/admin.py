@@ -18,7 +18,8 @@ class UserAdmin(_UserAdmin):
             'birth_date',
             'phone_num',
             'sex',
-            'is_confirmed'
+            'is_confirmed',
+            'is_doctor',
         )}),
         (_('Address'), {'fields': (
             'address_city',
