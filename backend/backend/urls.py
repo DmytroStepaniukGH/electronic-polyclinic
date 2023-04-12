@@ -10,6 +10,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 api = [
     path('', include('users.urls')),
     path('accounts/', include('accounts.urls')),
+    path('visites/', include('reviews.urls')),
 ]
 
 urlpatterns = [
