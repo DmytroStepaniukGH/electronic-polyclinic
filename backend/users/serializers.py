@@ -1,19 +1,25 @@
 from rest_framework import serializers
-from .models import Appointment, Doctor
+from .models import Appointment, Doctor, DoctorUnavailableTime
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
     #patient_last_name = serializers.CharField(source='patient.user.last_name')
+    #date = serializers.DateField()
 
     class Meta:
         model = Appointment
         fields = (
             'id',
-            'day',
+            'date',
             'time',
             'patient',
             'doctor',
             'status',
+            'medical_history',
+            'objective_status',
+            'diagnosis',
+            'examination',
+            'recommendations'
         )
 
     # def create(self, validated_data):
@@ -58,4 +64,15 @@ class SearchSerializer(serializers.ModelSerializer):
             'id',
             'last_name',
             'specialization'
+        )
+
+
+class SetUnavailableTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorUnavailableTime
+        fields = (
+            'id',
+            'doctor',
+            'date',
+            'time',
         )

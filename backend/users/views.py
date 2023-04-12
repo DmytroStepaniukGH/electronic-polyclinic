@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Appointment, Doctor, Patient
-from .serializers import AppointmentSerializer, DoctorListSerializer
+from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SetUnavailableTimeSerializer
 
 
 @extend_schema(
@@ -76,35 +76,68 @@ class CancelAppointmentView(APIView):
         time_to_cancel = self.request.parser_context.get('kwargs')['time']
 
         if not date_to_cancel or not time_to_cancel:
-            return Response({'Error': 'Date and time are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': 'Date and time are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             date_to_cancel = datetime.strptime(date_to_cancel, '%Y-%m-%d').date()
 
         except ValueError:
-            return Response({'error': 'Invalid date format. Please use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid date format. Please use YYYY-MM-DD.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             patient = Patient.objects.get(user=self.request.user)
 
         except Patient.DoesNotExist:
-            return Response({'Error': f'Cancel appointment can only authorized patient'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'Error': f'Cancel appointment can only authorized patient'},
+                            status=status.HTTP_404_NOT_FOUND)
 
-        appointment = Appointment.objects.get(patient=patient, day=date_to_cancel, time=time_to_cancel)
-        print('Статус', appointment.status)
+        appointment = Appointment.objects.get(patient=patient,
+                                              date=date_to_cancel,
+                                              time=time_to_cancel)
         if appointment:
-            appointment.status = 'Скасовано'
+            #appointment.status = 'Скасовано'
             #appointment.save()
             appointment.delete()
             return Response(f'Appointment canceled', status=status.HTTP_200_OK)
         else:
-            return Response(f'Error', status=status.HTTP_400_BAD_REQUEST)
+            return Response(f'No records found with this date and time',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    tags=['Appointments']
+)
+# class CloseAppointmentView(generics.UpdateAPIView):
+#     queryset = Appointment.objects.all()
+#     serializer_class = AppointmentSerializer
+#
+#     def get_queryset(self):
+#         if self.request.user.is_doctor:
+#             return super().get_queryset().filter(doctor=self.request.user.doctor,
+#                                                  date=self.request.data.get('date'),
+#                                                  time=self.request.data.get('time'))
+class CloseAppointmentView(APIView):
+    serializer_class = AppointmentSerializer
+
+    def post(self, request):
+        serializer = AppointmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            print(request.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @extend_schema(
     tags=['Doctors']
 )
 class SetUnavailableTimeView(APIView):
+    serializer_class = SetUnavailableTimeSerializer
 
     def post(self, *args, **kwargs):
         date_to_set_unavailable = self.request.parser_context.get('kwargs')['date']
@@ -139,9 +172,11 @@ class SearchAPIView(generics.ListAPIView):
     tags=['Doctors']
 )
 class AllSpecializations(APIView):
+    serializer_class = SpecializationsSerializer
 
     def get(self, request):
-        return Response(Doctor.objects.values_list("specialization").distinct(), status=status.HTTP_200_OK)
+        return Response(Doctor.objects.values_list("specialization").distinct(),
+                        status=status.HTTP_200_OK)
 
 
 @extend_schema(

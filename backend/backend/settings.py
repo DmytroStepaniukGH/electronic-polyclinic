@@ -161,8 +161,8 @@ FRONTEND_PASSWORD_RESET_PATH = '/password-reset-confirm/{uid}/{token}'
 FRONTEND_REGISTRATION_CONFIRM_PATH = '/register-user-confirm/{uid}/{token}'
 
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'doctor_profile_photo')
+MEDIA_URL = '/doctor_profile_photo/'
 
 #Email sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
