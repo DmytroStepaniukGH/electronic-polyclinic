@@ -63,4 +63,3 @@ class ConfirmRegistrationSerializer(serializers.Serializer):
         user.is_confirmed = 1
         user.save(update_fields=('is_confirmed',))
         return user
-
