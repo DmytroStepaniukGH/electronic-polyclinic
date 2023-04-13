@@ -77,9 +77,10 @@ class Patient(models.Model):
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_image = models.ImageField(verbose_name='Фото профіля',
-                                      upload_to='doctors_profile_photo',
-                                      default="default_image.png",
+                                      upload_to='doctor_profile_photo',
+                                      default="doctor_profile_photo/default_image.png",
                                       blank=True)
+
     specialization = models.CharField(verbose_name='Спеціалізація', max_length=150)
     price = models.IntegerField(verbose_name='Вартість прийому')
     experience = models.CharField(verbose_name='Стаж', max_length=20)
@@ -112,23 +113,6 @@ class Doctor(models.Model):
         unavailable_time = DoctorUnavailableTime(doctor=self, date=date, time=time)
         unavailable_time.save()
 
-    def close_appointment(self, date, time, medical_history, objective_status,
-                          diagnosis, examination, recommendations):
-        appointment = Appointment.objects.get(doctor=self, day=date, time=time)
-
-        if appointment:
-            appointment.medical_history = medical_history
-            appointment.objective_status = objective_status
-            appointment.diagnosis = diagnosis
-            appointment.examination = examination
-            appointment.recommendations = recommendations
-
-            appointment.status = 'Closed'
-            appointment.save()
-
-            return True
-        else:
-            return False
 
     def __str__(self):
         return f'{self.specialization} - {self.user.last_name} {self.user.first_name}' \

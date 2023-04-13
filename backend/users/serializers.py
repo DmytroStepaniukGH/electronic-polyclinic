@@ -87,3 +87,14 @@ class SetUnavailableTimeSerializer(serializers.ModelSerializer):
             'date',
             'time',
         )
+
+
+class CreateAppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = (
+            'id',
+            'doctor',
+            'date',
+            'time',
+        )

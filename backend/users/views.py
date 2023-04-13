@@ -7,13 +7,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Appointment, Doctor, Patient
-from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SetUnavailableTimeSerializer
+from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, \
+    SetUnavailableTimeSerializer, CreateAppointmentSerializer
 
 
 @extend_schema(
     tags=['Appointments']
 )
 class CreateAppointmentView(APIView):
+    serializer_class = CreateAppointmentSerializer
 
     def post(self, request, *args, **kwargs):
         date = self.request.parser_context.get('kwargs')['date']
@@ -44,6 +46,7 @@ class AppointmentListView(generics.ListAPIView):
     tags=['Appointments']
 )
 class AvailableSlotsView(APIView):
+
     def get(self, *args, **kwargs):
         doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
         date_str = self.request.parser_context.get('kwargs')['date']
@@ -71,7 +74,7 @@ class AvailableSlotsView(APIView):
 )
 class CancelAppointmentView(APIView):
 
-    def post(self, *args, **kwargs):
+    def delete(self, *args, **kwargs):
         date_to_cancel = self.request.parser_context.get('kwargs')['date']
         time_to_cancel = self.request.parser_context.get('kwargs')['time']
 
@@ -109,28 +112,47 @@ class CancelAppointmentView(APIView):
 @extend_schema(
     tags=['Appointments']
 )
-# class CloseAppointmentView(generics.UpdateAPIView):
-#     queryset = Appointment.objects.all()
-#     serializer_class = AppointmentSerializer
-#
-#     def get_queryset(self):
-#         if self.request.user.is_doctor:
-#             return super().get_queryset().filter(doctor=self.request.user.doctor,
-#                                                  date=self.request.data.get('date'),
-#                                                  time=self.request.data.get('time'))
-class CloseAppointmentView(APIView):
+class CloseAppointmentView(generics.UpdateAPIView):
+    queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
 
-    def post(self, request):
-        serializer = AppointmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            print(request.data)
+    def put(self, request):
+        doctor = self.request.user.doctor
+        print(doctor)
+        new_status = self.request.data.get('status')
+        medical_history = self.request.data.get('medical_history')
+        objective_status = self.request.data.get('objective_status')
+        diagnosis = self.request.data.get('diagnosis')
+        examination = self.request.data.get('examination')
+        recommendations = self.request.data.get('recommendations')
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        appointment = self.get_queryset()
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if appointment:
+            if appointment.update(status=new_status, medical_history=medical_history,
+                               objective_status=objective_status, diagnosis=diagnosis,
+                               examination=examination, recommendations=recommendations):
 
+                return Response('Appointment has been updated successfully', status=status.HTTP_202_ACCEPTED)
+            return Response('Error: please, check your data', status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response('Error: appointment does not exists', status=status.HTTP_404_NOT_FOUND)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.get(pk=self.request.user.doctor.id)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def get_queryset(self):
+        if self.request.user.is_doctor:
+            return super().get_queryset().filter(doctor_id=self.request.user.doctor,
+                                                 date=self.request.data.get('date'),
+                                                 time=self.request.data.get('time')
+                                                )
+        else:
+            raise Exception('User must be a doctor')
 
 
 @extend_schema(
