@@ -1,5 +1,7 @@
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import logout
 
 from drf_spectacular.utils import extend_schema
@@ -8,7 +10,11 @@ from drf_spectacular.utils import extend_schema
 @extend_schema(
     tags=['Users'],
 )
-class LogoutView(APIView):
-    def post(self, request):
+class LogoutView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = [TokenAuthentication, ]
+
+    def get(self, request):
+        request.user.auth_token.delete()
         logout(request)
         return Response({'message': "Logout successful"})
