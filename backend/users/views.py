@@ -1,21 +1,28 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status, viewsets, filters
-from rest_framework.generics import GenericAPIView, ListAPIView
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Appointment, Doctor
-from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SearchSerializer
+from .models import Appointment, Doctor, Patient
+from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, SetUnavailableTimeSerializer
 
 
 @extend_schema(
     tags=['Appointments']
 )
-class AppointmentCreateView(generics.CreateAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+class CreateAppointmentView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        date = self.request.parser_context.get('kwargs')['date']
+        time = self.request.parser_context.get('kwargs')['time']
+        doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
+
+        patient = Patient.objects.get(user=self.request.user)
+
+        return Response(patient.create_appointment(doctor_id=doctor_id, date=date, time=time))
 
 
 @extend_schema(
@@ -60,6 +67,98 @@ class AvailableSlotsView(APIView):
 
 
 @extend_schema(
+    tags=['Appointments']
+)
+class CancelAppointmentView(APIView):
+
+    def post(self, *args, **kwargs):
+        date_to_cancel = self.request.parser_context.get('kwargs')['date']
+        time_to_cancel = self.request.parser_context.get('kwargs')['time']
+
+        if not date_to_cancel or not time_to_cancel:
+            return Response({'Error': 'Date and time are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            date_to_cancel = datetime.strptime(date_to_cancel, '%Y-%m-%d').date()
+
+        except ValueError:
+            return Response({'error': 'Invalid date format. Please use YYYY-MM-DD.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            patient = Patient.objects.get(user=self.request.user)
+
+        except Patient.DoesNotExist:
+            return Response({'Error': f'Cancel appointment can only authorized patient'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        appointment = Appointment.objects.get(patient=patient,
+                                              date=date_to_cancel,
+                                              time=time_to_cancel)
+        if appointment:
+            #appointment.status = 'Скасовано'
+            #appointment.save()
+            appointment.delete()
+            return Response(f'Appointment canceled', status=status.HTTP_200_OK)
+        else:
+            return Response(f'No records found with this date and time',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    tags=['Appointments']
+)
+# class CloseAppointmentView(generics.UpdateAPIView):
+#     queryset = Appointment.objects.all()
+#     serializer_class = AppointmentSerializer
+#
+#     def get_queryset(self):
+#         if self.request.user.is_doctor:
+#             return super().get_queryset().filter(doctor=self.request.user.doctor,
+#                                                  date=self.request.data.get('date'),
+#                                                  time=self.request.data.get('time'))
+class CloseAppointmentView(APIView):
+    serializer_class = AppointmentSerializer
+
+    def post(self, request):
+        serializer = AppointmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            print(request.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@extend_schema(
+    tags=['Doctors']
+)
+class SetUnavailableTimeView(APIView):
+    serializer_class = SetUnavailableTimeSerializer
+
+    def post(self, *args, **kwargs):
+        date_to_set_unavailable = self.request.parser_context.get('kwargs')['date']
+        time_to_set_unavailable = self.request.parser_context.get('kwargs')['time']
+
+        if not date_to_set_unavailable or not time_to_set_unavailable:
+            return Response({'Error': 'Date and time are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            date_to_cancel = datetime.strptime(date_to_set_unavailable, '%Y-%m-%d').date()
+
+        except ValueError:
+            return Response({'error': 'Invalid date format. Please use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        doctor = Doctor.objects.get(user=self.request.user)
+        doctor.set_unavailable_time(date_to_set_unavailable, time_to_set_unavailable)
+
+        return Response(f'Time {date_to_cancel} {time_to_set_unavailable} has been set unavailable', status=status.HTTP_200_OK)
+
+
+@extend_schema(
     tags=['Doctors']
 )
 class SearchAPIView(generics.ListAPIView):
@@ -73,9 +172,11 @@ class SearchAPIView(generics.ListAPIView):
     tags=['Doctors']
 )
 class AllSpecializations(APIView):
+    serializer_class = SpecializationsSerializer
 
     def get(self, request):
-        return Response(Doctor.objects.values_list("specialization").distinct(), status=status.HTTP_200_OK)
+        return Response(Doctor.objects.values_list("specialization").distinct(),
+                        status=status.HTTP_200_OK)
 
 
 @extend_schema(
@@ -88,6 +189,22 @@ class DoctorsListViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Doctor.objects.all()
 
         return queryset
+
+
+@extend_schema(
+    tags=['Doctors'],
+    description="Return information about doctor"
+)
+class DoctorView(APIView):
+    serializer_class = DoctorListSerializer
+
+    def get(self, *args, **kwargs):
+        doctor_id = self.request.parser_context.get('kwargs')['doctor_id']
+
+        doctor_info = Doctor.objects.get(id=doctor_id)
+        doctor_serializer = DoctorListSerializer(doctor_info)
+
+        return Response(doctor_serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
