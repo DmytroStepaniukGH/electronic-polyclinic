@@ -70,38 +70,37 @@ class AccountPasswordEditSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
     old_password = serializers.CharField(write_only=True, required=True)
+    user_id = serializers.IntegerField()
 
     class Meta:
         model = User
         fields = (
             'old_password',
             'password',
-            'password2'
+            'password2',
+            'user_id'
         )
 
     def validate(self, attrs):
         request = self.context.get("request")
         user = request.user
-        print(user)
-        print(user.pk)
-        print(attrs['old_password'])
 
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
 
-        if not check_password(attrs['old_password'], user.password):
+        if not user.check_password(attrs['old_password']):
             raise serializers.ValidationError({"old_password": "Old password is not correct"})
 
         return attrs
 
-    def update(self, instance, validated_data):
-
+    def save(self, **kwargs):
         user = self.context['request'].user
 
-        if user.pk != instance.pk:
+        if user.pk != self.validated_data['user_id']:
             raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
 
-        instance.set_password(validated_data['password'])
-        instance.save()
+        user.set_password(self.validated_data['password'])
+        user.save()
 
-        return instance
+        return user
+
