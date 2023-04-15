@@ -5,7 +5,7 @@ from accounts.views.registration import RegistrationView, ConfirmRegistrationVie
 from accounts.views.login import LoginView # noqa
 from accounts.views.logout import LogoutView # noqa
 from accounts.views.account_info import AccountView # noqa
-from accounts.views.account_edit import AccountEditView # noqa
+from accounts.views.account_edit import AccountEditView, AccountPasswordEditView # noqa
 
 app_name = 'accounts'
 
@@ -17,5 +17,6 @@ urlpatterns = [
     path('login-user/', LoginView.as_view(), name='login-user'),
     path('logout-user/', LogoutView.as_view(), name='logout-user'),
     path('user-<user_id>/my-account/', AccountView.as_view(), name='my-account'),
-    path('user/my-account/edit/', AccountEditView.as_view(), name='my-account-edit')
+    path('user/my-account/edit/', AccountEditView.as_view(), name='my-account-edit'),
+    path('user-<user_id>/my-account/edit-password/', AccountPasswordEditView.as_view(), name='edit-password')
 ]

@@ -1,4 +1,8 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import check_password
+from rest_framework.response import Response
+from rest_framework import status
 
 from accounts.models import User # noqa
 
@@ -57,6 +61,47 @@ class AccountEditSerializer(serializers.ModelSerializer):
         instance.address_house = validated_data['address_house']
         instance.address_appartment = validated_data['address_appartment']
 
+        instance.save()
+
+        return instance
+
+
+class AccountPasswordEditSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+    old_password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'old_password',
+            'password',
+            'password2'
+        )
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = request.user
+        print(user)
+        print(user.pk)
+        print(attrs['old_password'])
+
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+
+        if not check_password(attrs['old_password'], user.password):
+            raise serializers.ValidationError({"old_password": "Old password is not correct"})
+
+        return attrs
+
+    def update(self, instance, validated_data):
+
+        user = self.context['request'].user
+
+        if user.pk != instance.pk:
+            raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
+
+        instance.set_password(validated_data['password'])
         instance.save()
 
         return instance
