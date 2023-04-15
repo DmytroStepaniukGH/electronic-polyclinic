@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'base',
     'users',
     'accounts',
+    'reviews',
     'rest_framework',
     'drf_spectacular',
 ]
