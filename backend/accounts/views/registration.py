@@ -23,10 +23,7 @@ class RegistrationView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user_model = get_user_model()
         if serializer.is_valid():
-            user_model.objects.create_user(
-                serializer.data['email']
-            )
-            user = user_model.objects.get(email__iexact=serializer.data['email'])
+            user = serializer.save()
             send_email_for_registration_confirm.apply_async(args=(user.pk,))
         return Response(status=status.HTTP_204_NO_CONTENT)
 

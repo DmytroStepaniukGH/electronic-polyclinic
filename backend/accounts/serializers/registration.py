@@ -11,19 +11,21 @@ UserModel = get_user_model()
 
 class RegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    first_name = serializers.CharField(write_only=True)
-    last_name = serializers.CharField(write_only=True)
-    phone_num = serializers.CharField(write_only=True)
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    phone_num = serializers.CharField()
     password = serializers.CharField(write_only=True, validators=[validate_password])
 
     def create(self, validated_data):
-        user = UserModel.objects.create_user(
+        user = UserModel.objects.create(
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             phone_num=validated_data['phone_num'],
-            password=validated_data['password'],
+            password=validated_data['password']
         )
+        user.set_password(validated_data['password'])
+        user.save()
         return user
 
     class Meta:
