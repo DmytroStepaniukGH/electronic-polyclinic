@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils import timezone
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import send_mail
 
 from accounts.utils import encode_uid # noqa
 from backend.celery import app # noqa
@@ -25,6 +25,14 @@ def send_email_for_password_reset(user_id: int):
     link = urljoin(
         settings.FRONTEND_HOST,
         settings.FRONTEND_PASSWORD_RESET_PATH.format(uid=uid, token=token),
+    )
+
+    message = f'Hello. To reset password for your account click this link: {link}'
+    send_mail(
+        subject='Reset password link',
+        message=message,
+        from_email=EMAIL_HOST_USER,
+        recipient_list=[user]
     )
 
     print(link, flush=True)
