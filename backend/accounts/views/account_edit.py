@@ -6,7 +6,7 @@ from rest_framework import status
 
 from drf_spectacular.utils import extend_schema
 
-from accounts.serializers.account_edit import AccountEditSerializer # noqa
+from accounts.serializers.account_edit import AccountEditSerializer, AccountPasswordEditSerializer # noqa
 from accounts.models import User # noqa
 
 
@@ -29,4 +29,20 @@ class AccountEditView(UpdateAPIView):
             defaults=serializer.validated_data
         )
         serializer.update(instance, serializer.validated_data)
+        return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    tags=['Users'],
+    description='Editing password from account page.'
+)
+class AccountPasswordEditView(UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AccountPasswordEditSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(status=status.HTTP_200_OK)
