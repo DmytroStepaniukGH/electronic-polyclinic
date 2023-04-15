@@ -1,6 +1,9 @@
-from django.contrib.auth import login
-from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
@@ -16,14 +19,21 @@ class LoginView(APIView):
     authentication_classes = []
     serializer_class = LoginSerializer
 
+    @csrf_exempt
     def post(self, request):
-        serializer = LoginSerializer(
-            data=self.request.data,
-            context={'request': self.request}
-        )
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.validated_data['user']
-            login(request, user)
-            return Response(None, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(None, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get("email")
+        password = request.data.get("password")
+        if email is None or password is None:
+            return Response({'error': 'Both "email" and "password" are required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(email=email, password=password)
+
+        if not user:
+            return Response({'error': 'Access denied: wrong email or password.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        login(request, user)
+        return Response({'token': token.key},
+                        status=status.HTTP_200_OK)
