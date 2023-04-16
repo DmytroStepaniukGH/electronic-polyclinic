@@ -42,10 +42,10 @@ INSTALLED_APPS = [
     'users',
     'accounts',
     'reviews',
+    'patientcard',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
-    'reviews',
 ]
 
 MIDDLEWARE = [

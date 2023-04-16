@@ -22,7 +22,7 @@ class FinishedAppointmentsListView(ListAPIView):
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
-        visit_status = 'Завершений'
+        visit_status = 'Closed'
         queryset_filter = super().get_queryset().filter(
             patient_id=self.request.user.patient,
             status=visit_status
