@@ -30,6 +30,15 @@ STATUS_CHOICES = (
     ("Closed", "Closed"),
 )
 
+SPECIALIZATION_CHOICES = (
+    ("Дерматолог", "Дерматолог"),
+    ("Кардіолог", "Кардіолог"),
+    ("Пульмонолог", "Пульмонолог"),
+    ("Нейрологія", "Нейрологія"),
+    ("Терапевт", "Терапевт"),
+    ("Гастроентеролог", "Гастроентеролог"),
+)
+
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -48,7 +57,7 @@ class Patient(models.Model):
 
             if not check_another_appointment:
                 if time not in unavailable_times:
-                    appointment = Appointment(patient=self, doctor=doctor, day=date, time=time)
+                    appointment = Appointment(patient=self, doctor=doctor, date=date, time=time)
                     appointment.save()
                     return f'Appointment at {date} {time} has been created successfully'
                 else:
@@ -59,19 +68,15 @@ class Patient(models.Model):
         else:
             return 'Date/time not valid'
 
-    '''
-    def cancel_appointment(self, date, time):
 
-        appointment = self.appointments.filter(day=date).filter(time=time)
-        if appointment:
-            appointment.status = 'Скасовано'
-            print('Status', appointment.status)
-            appointment.save(update_fields=['status'])
-            print(appointment.status)
+class Specialization(models.Model):
+    name = models.CharField(max_length=30, choices=SPECIALIZATION_CHOICES, default="Не обрано")
+    image = models.FileField(verbose_name='Зображення спеціальності',
+                             upload_to='specialization_images',
+                             default='Cardiologist.svg')
 
-        else:
-            return Exception('Не знайдено записів з такими датою і часом')
-    '''
+    def __str__(self):
+        return self.name
 
 
 class Doctor(models.Model):
@@ -80,12 +85,15 @@ class Doctor(models.Model):
                                       upload_to='doctor_profile_photo',
                                       default="doctor_profile_photo/default_image.png",
                                       blank=True)
-
-    specialization = models.CharField(verbose_name='Спеціалізація', max_length=150)
+    specialization = models.ForeignKey(Specialization, on_delete=models.RESTRICT, related_name='specialization')
     price = models.IntegerField(verbose_name='Вартість прийому')
     experience = models.CharField(verbose_name='Стаж', max_length=20)
     category = models.CharField(verbose_name='Категорія', max_length=30)
-    info = models.CharField(verbose_name='Інформація про лікаря', max_length=1000)
+    info = models.CharField(verbose_name='Загальна нформація про лікаря', max_length=1000, blank=True)
+    education = models.CharField(verbose_name='Освіта', default='', max_length=1000)
+    courses = models.CharField(verbose_name='Курси', default='', max_length=1000, blank=True)
+    procedures_performed = models.CharField(verbose_name='Виконувані процедури', default='',
+                                            max_length=1000, blank=True)
 
     def get_available_slots(self, date):
         slots = [date, {}]
@@ -112,7 +120,6 @@ class Doctor(models.Model):
     def set_unavailable_time(self, date, time):
         unavailable_time = DoctorUnavailableTime(doctor=self, date=date, time=time)
         unavailable_time.save()
-
 
     def __str__(self):
         return f'{self.specialization} - {self.user.last_name} {self.user.first_name}' \

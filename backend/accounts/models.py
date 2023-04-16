@@ -17,7 +17,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(verbose_name='Імʼя', max_length=150, blank=True)
     last_name = models.CharField(verbose_name='Прізвище', max_length=150, blank=True)
     patronim_name = models.CharField(verbose_name='По-батькові', max_length=150, blank=True)
-    birth_date = models.CharField(verbose_name='Дата народження', max_length=8, blank=True)
+    birth_date = models.CharField(verbose_name='Дата народження', max_length=10, blank=True)
     email = models.EmailField(verbose_name='Email', unique=True, blank=True)
     phone_num = models.CharField(verbose_name='Номер телефону', max_length=13, blank=True)
     sex = models.CharField(verbose_name='Стать', max_length=10, blank=True)

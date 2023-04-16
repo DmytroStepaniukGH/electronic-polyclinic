@@ -6,7 +6,7 @@ from rest_framework import generics, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Appointment, Doctor, Patient
+from .models import Appointment, Doctor, Patient, Specialization
 from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, \
     SetUnavailableTimeSerializer, CreateAppointmentSerializer
 
@@ -184,7 +184,7 @@ class SetUnavailableTimeView(APIView):
     tags=['Doctors']
 )
 class SearchAPIView(generics.ListAPIView):
-    search_fields = ['user__last_name', 'specialization']
+    search_fields = ['user__last_name', 'specialization__name']
     filter_backends = (filters.SearchFilter,)
     queryset = Doctor.objects.all()
     serializer_class = DoctorListSerializer
@@ -193,13 +193,23 @@ class SearchAPIView(generics.ListAPIView):
 @extend_schema(
     tags=['Doctors']
 )
-class AllSpecializations(APIView):
+# class AllSpecializations(APIView):
+#     serializer_class = SpecializationsSerializer
+#
+#     def get(self, request):
+#         return Response(Specialization.objects.values_list("specialization").distinct(),
+#                         status=status.HTTP_200_OK)
+
+@extend_schema(
+    tags=['Doctors']
+)
+class AllSpecializations(viewsets.ReadOnlyModelViewSet):
     serializer_class = SpecializationsSerializer
 
-    def get(self, request):
-        return Response(Doctor.objects.values_list("specialization").distinct(),
-                        status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = Specialization.objects.all()
 
+        return queryset
 
 @extend_schema(
     tags=['Doctors']
