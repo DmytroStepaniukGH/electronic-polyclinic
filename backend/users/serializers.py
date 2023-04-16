@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment, Doctor, DoctorUnavailableTime
+from .models import Appointment, Doctor, DoctorUnavailableTime, Specialization
 from reviews.models import Review # noqa
 
 
@@ -23,17 +23,14 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'recommendations'
         )
 
-    # def create(self, validated_data):
-    #     return Appointment.objects.create(**validated_data)
-
 
 class DoctorListSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name')
     first_name = serializers.CharField(source='user.first_name')
     patronim_name = serializers.CharField(source='user.patronim_name')
     email = serializers.CharField(source='user.email')
+    specialization = serializers.CharField(source='specialization.name')
     rating = serializers.SerializerMethodField('get_average_rating')
-
 
     def get_average_rating(self, obj):
         reviews_rating = Review.objects.filter(doctor_id=obj.id).values_list('review_rating', flat=True)
@@ -62,12 +59,13 @@ class DoctorListSerializer(serializers.ModelSerializer):
 
 class SpecializationsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Doctor
-        fields = ('specialization',)
+        model = Specialization
+        fields = ('name', 'image')
 
 
 class SearchSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name')
+    specialization = serializers.CharField(source='doctor.specialization.name')
 
     class Meta:
         model = Doctor
@@ -81,6 +79,17 @@ class SearchSerializer(serializers.ModelSerializer):
 class SetUnavailableTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorUnavailableTime
+        fields = (
+            'id',
+            'doctor',
+            'date',
+            'time',
+        )
+
+
+class CreateAppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
         fields = (
             'id',
             'doctor',
