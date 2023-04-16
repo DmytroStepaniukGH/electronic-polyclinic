@@ -1,6 +1,6 @@
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -16,7 +16,7 @@ from accounts.models import User # noqa
 )
 class AccountView(RetrieveAPIView):
     permission_classes = (IsAuthenticated, )
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AccountSerializer
 
     def get(self, request, *args, **kwargs):

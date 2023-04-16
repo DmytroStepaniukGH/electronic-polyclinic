@@ -1,6 +1,6 @@
 from rest_framework.generics import UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -16,7 +16,7 @@ from accounts.models import User # noqa
 )
 class AccountEditView(UpdateAPIView):
     permission_classes = (IsAuthenticated, )
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AccountEditSerializer
     queryset = User.objects.all()
     lookup_field = 'pk'
