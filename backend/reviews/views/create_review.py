@@ -1,6 +1,6 @@
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
@@ -16,7 +16,7 @@ from users.models import Appointment # noqa
 )
 class CreateReviewView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [BasicAuthentication, TokenAuthentication]
     serializer_class = CreateReviewSerialiser
 
     def create(self, request, *args, **kwargs):

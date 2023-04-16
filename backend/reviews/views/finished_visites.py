@@ -2,6 +2,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 
 from drf_spectacular.utils import extend_schema
 
@@ -15,6 +17,8 @@ from users.serializers import AppointmentSerializer # noqa
 )
 class FinishedAppointmentsListView(ListAPIView):
     queryset = Appointment.objects.all()
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
@@ -32,6 +36,8 @@ class FinishedAppointmentsListView(ListAPIView):
 )
 class FinishedAppointmentView(APIView):
     queryset = Appointment.objects.all()
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AppointmentSerializer
 
     def get(self, *args, **kwargs):
