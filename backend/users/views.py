@@ -6,6 +6,9 @@ from rest_framework import generics, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+
 from .models import Appointment, Doctor, Patient, Specialization
 from .serializers import AppointmentSerializer, DoctorListSerializer, SpecializationsSerializer, \
     SetUnavailableTimeSerializer, CreateAppointmentSerializer
@@ -33,6 +36,8 @@ class CreateAppointmentView(APIView):
 )
 class AppointmentListView(generics.ListAPIView):
     queryset = Appointment.objects.all()
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
@@ -215,6 +220,8 @@ class AllSpecializations(viewsets.ReadOnlyModelViewSet):
     tags=['Doctors']
 )
 class DoctorsListViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = DoctorListSerializer
 
     def get_queryset(self):

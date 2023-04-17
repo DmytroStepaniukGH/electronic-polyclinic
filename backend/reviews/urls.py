@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views.finished_visites import FinishedAppointmentsListView
-from .views.finished_visites import FinishedAppointmentView
-from .views.create_review import CreateReviewView
+from reviews.views.finished_visites import FinishedAppointmentsListView # noqa
+from reviews.views.finished_visites import FinishedAppointmentView # noqa
+from reviews.views.create_review import CreateReviewView # noqa
 
 urlpatterns = [
     path('finished/', FinishedAppointmentsListView.as_view(), name='finished-appointments'),
