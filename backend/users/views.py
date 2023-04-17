@@ -220,8 +220,6 @@ class AllSpecializations(viewsets.ReadOnlyModelViewSet):
     tags=['Doctors']
 )
 class DoctorsListViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated, )
-    authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = DoctorListSerializer
 
     def get_queryset(self):
