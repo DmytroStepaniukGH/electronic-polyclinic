@@ -12,7 +12,7 @@ class AccountEditSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     patronim_name = serializers.CharField(max_length=150)
-    birth_date = serializers.CharField(max_length=8)
+    birth_date = serializers.CharField(max_length=10)
     sex = serializers.CharField()
     email = serializers.EmailField()
     phone_num = serializers.CharField(max_length=13)
@@ -49,6 +49,9 @@ class AccountEditSerializer(serializers.ModelSerializer):
 
         if user.pk != instance.pk:
             raise serializers.ValidationError({"authorize": "You dont have permission for this user."})
+
+        if user.is_doctor:
+            raise serializers.ValidationError({"authorize": "Your personal data is not editable."})
 
         instance.first_name = validated_data['first_name']
         instance.last_name = validated_data['last_name']

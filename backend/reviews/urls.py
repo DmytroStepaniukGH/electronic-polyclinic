@@ -1,11 +1,13 @@
 from django.urls import path
 
-from .views.finished_visites import FinishedAppointmentsListView
-from .views.finished_visites import FinishedAppointmentView
-from .views.create_review import CreateReviewView
+from reviews.views.finished_visites import FinishedAppointmentsListView # noqa
+from reviews.views.finished_visites import FinishedAppointmentView # noqa
+from reviews.views.create_review import CreateReviewView # noqa
+from reviews.views.create_pdf_visit_result import CreatePdfVisitResults # noqa
 
 urlpatterns = [
     path('finished/', FinishedAppointmentsListView.as_view(), name='finished-appointments'),
-    path('finished/id-<appointment_id>', FinishedAppointmentView.as_view(), name='appointment'),
-    path('finished/id-<appointment_id>/add-review', CreateReviewView.as_view(), name='add-review'),
+    path('finished/id-<int:appointment_id>', FinishedAppointmentView.as_view(), name='appointment'),
+    path('finished/id-<int:appointment_id>/add-review', CreateReviewView.as_view(), name='add-review'),
+    path('finished/id-<int:appointment_id>/create-pdf', CreatePdfVisitResults.as_view(), name='create-pdf')
 ]

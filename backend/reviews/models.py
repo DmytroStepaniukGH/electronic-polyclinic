@@ -1,8 +1,5 @@
 from django.db import models
 
-# from users.models import Doctor # noqa
-# from users.models import Appointment # noqa
-
 
 class Review(models.Model):
     appointment = models.OneToOneField(to='users.Appointment', on_delete=models.CASCADE, default=1)

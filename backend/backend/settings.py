@@ -42,10 +42,10 @@ INSTALLED_APPS = [
     'users',
     'accounts',
     'reviews',
+    'patientcard',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
-    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -147,9 +147,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
     ),
 }
 

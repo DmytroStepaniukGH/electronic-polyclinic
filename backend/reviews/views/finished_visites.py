@@ -13,7 +13,8 @@ from users.serializers import AppointmentSerializer # noqa
 
 @extend_schema(
     tags=['Appointments'],
-    description="Return list of finished appointments for authorized user"
+    description="Return list of finished appointments for authorized user. "
+                "Page finished_visites and patient_card_history."
 )
 class FinishedAppointmentsListView(ListAPIView):
     queryset = Appointment.objects.all()
@@ -22,7 +23,7 @@ class FinishedAppointmentsListView(ListAPIView):
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
-        visit_status = 'Завершений'
+        visit_status = 'Closed'
         queryset_filter = super().get_queryset().filter(
             patient_id=self.request.user.patient,
             status=visit_status

@@ -6,6 +6,10 @@ from reviews.models import Review # noqa
 class AppointmentSerializer(serializers.ModelSerializer):
     #patient_last_name = serializers.CharField(source='patient.user.last_name')
     #date = serializers.DateField()
+    doctor_lastname = serializers.CharField(source='doctor.user.last_name')
+    doctor_name = serializers.CharField(source='doctor.user.first_name')
+    doctor_patronim = serializers.CharField(source='doctor.user.patronim_name')
+    specialization = serializers.CharField(source='doctor.specialization.name')
 
     class Meta:
         model = Appointment
@@ -15,6 +19,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'time',
             'patient',
             'doctor',
+            'doctor_lastname',
+            'doctor_name',
+            'doctor_patronim',
+            'specialization',
             'status',
             'medical_history',
             'objective_status',

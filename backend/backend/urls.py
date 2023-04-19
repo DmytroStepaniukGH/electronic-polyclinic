@@ -11,6 +11,7 @@ api = [
     path('', include('users.urls')),
     path('accounts/', include('accounts.urls')),
     path('', include('reviews.urls')),
+    path('patients/', include('patientcard.urls')),
 ]
 
 urlpatterns = [
