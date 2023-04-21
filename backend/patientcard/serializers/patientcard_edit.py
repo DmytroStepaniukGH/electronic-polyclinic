@@ -19,9 +19,8 @@ class PatientCardEditSerializer(serializers.Serializer):
         )
 
     def update(self, instance, validated_data):
-        instance.traumas_info = validated_data['traumas_info']
-        instance.operations_info = validated_data['operations_info']
-        instance.chronical_illness_info = validated_data['chronical_illness_info']
+        for key in validated_data:
+            setattr(instance, key, validated_data[key])
 
         instance.save()
 
