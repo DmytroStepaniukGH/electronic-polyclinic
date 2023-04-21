@@ -43,4 +43,4 @@ class ConfirmPasswordResetSerializer(serializers.Serializer):
         user = validated_data['user']
         user.set_password(validated_data['new_password'])
         user.save(update_fields=('password',))
-        return
+        return user
