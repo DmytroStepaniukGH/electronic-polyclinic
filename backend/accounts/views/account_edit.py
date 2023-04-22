@@ -1,4 +1,4 @@
-from rest_framework.generics import UpdateAPIView, CreateAPIView
+from rest_framework.generics import UpdateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.response import Response
@@ -18,18 +18,29 @@ class AccountEditView(UpdateAPIView):
     permission_classes = (IsAuthenticated, )
     authentication_classes = [TokenAuthentication, BasicAuthentication]
     serializer_class = AccountEditSerializer
-    queryset = User.objects.all()
-    lookup_field = 'pk'
 
     def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance, created = User.objects.update_or_create(
-            email=serializer.validated_data.get('email', None),
-            defaults=serializer.validated_data
-        )
-        serializer.update(instance, serializer.validated_data)
-        return Response(status=status.HTTP_200_OK)
+        user_id = self.request.parser_context.get('kwargs')['user_id']
+        partial = kwargs.pop('partial', False)
+        queryset = User.objects.filter(id=user_id)
+        user_instance = get_object_or_404(queryset)
+        serializer = AccountEditSerializer(user_instance, data=request.data, partial=partial)
+
+        if serializer.is_valid():
+            if user_id != self.request.user.pk:
+                return Response(
+                    {"authorize": "You dont have permission for this user."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if self.request.user.is_doctor:
+                return Response(
+                    {"authorize": "Your personal data is not editable."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
