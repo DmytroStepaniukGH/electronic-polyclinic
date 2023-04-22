@@ -7,6 +7,9 @@ from django.conf.urls.static import static
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from accounts.views.password_reset import PasswordResetConfirmView # noqa
+from accounts.views.registration import ConfirmRegistrationView # noqa
+
 api = [
     path('', include('users.urls')),
     path('accounts/', include('accounts.urls')),
@@ -20,6 +23,16 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path(
+        'password-reset-confirm/<str:uid>/<str:token>',
+        PasswordResetConfirmView.as_view(),
+        name='password-reset-confirm'
+    ),
+    path(
+        'register-user-confirm/<str:uid>/<str:token>',
+        ConfirmRegistrationView.as_view(),
+        name='register-user-confirm'
+    ),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
